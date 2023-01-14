@@ -1,4 +1,4 @@
-namespace _4
+namespace Task4
 {
     internal static class Program
     {
