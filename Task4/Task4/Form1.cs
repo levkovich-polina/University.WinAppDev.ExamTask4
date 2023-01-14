@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Task4
 {
     public partial class Form1 : Form
@@ -17,14 +19,20 @@ namespace Task4
 
         private void Panel_MouseMove(object sender, MouseEventArgs e)
         {
+            Stopwatch stopWatch = new Stopwatch();
             Random r = new Random();
             Pen pen = new Pen(Color.FromArgb(r.Next(255), r.Next(255), r.Next(255), r.Next(255)), 10);
             list.Add(new Point(e.X, e.Y));
             if (Panel.Capture)
             {
+                stopWatch.Start();
                 Position.Add(new Point(e.X, e.Y));
                 Graphics g = Panel.CreateGraphics();
                 g.DrawLines(pen, list.ToArray());
+            }
+            else
+            {
+                stopWatch.Stop();
             }
         }
 
