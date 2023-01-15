@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Timer = System.Threading.Timer;
 
 namespace Task4
 {
@@ -6,29 +7,23 @@ namespace Task4
     {
         List<Point> list = new List<Point>();
         List<Point> Position = new List<Point>();
-
+        bool button = false;
+        Pen color;
         public Form1()
         {
             InitializeComponent();
         }
 
-        private void Panel_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
         private void Panel_MouseMove(object sender, MouseEventArgs e)
         {
             Stopwatch stopWatch = new Stopwatch();
-            Random r = new Random();
-            Pen pen = new Pen(Color.FromArgb(r.Next(255), r.Next(255), r.Next(255), r.Next(255)), 10);
             list.Add(new Point(e.X, e.Y));
             if (Panel.Capture)
             {
                 stopWatch.Start();
                 Position.Add(new Point(e.X, e.Y));
                 Graphics g = Panel.CreateGraphics();
-                g.DrawLines(pen, list.ToArray());
+                g.DrawLine(color, list[list.Count - 2], list[list.Count - 1]);
             }
             else
             {
@@ -49,32 +44,41 @@ namespace Task4
             if (e.Button == MouseButtons.Left)
             {
                 Panel.Capture = true;
-               
+                Random r = new Random();
+                Pen pen = new Pen(Color.FromArgb(r.Next(255), r.Next(255), r.Next(255), r.Next(255)), 10);
+                color = pen;
             }
         }
-
-        bool button = false;
-
+        private Timer _timer;
         private void ReproduceButton_Click(object sender, EventArgs e)
         {
             if (Panel.Capture == false)
             {
                 ReproduceButton.Enabled = true;
                 button = true;
-
             }
             else
             {
                 ReproduceButton.Enabled = false;
             }
+
             if (button == true)
             {
-                Panel.Controls.Clear();
-                Pen pen = new Pen(Color.Black, 10);
-                Graphics g = Panel.CreateGraphics();
-                g.DrawLines(pen, Position.ToArray());
-
+                Panel.Invalidate();
+                int num = 0;
+                // устанавливаем метод обратного вызова
+                TimerCallback tm = new TimerCallback(Draw);
+                _timer = new Timer(tm, num, 0, 2000);
             }
+        }
+       
+        private int _drawingLineCounter = 0;
+        public void Draw(object obj)
+        {
+            Graphics g = Panel.CreateGraphics();
+            g.DrawLine(new Pen(Color.Black), list[_drawingLineCounter], list[_drawingLineCounter + 1]);
+            _drawingLineCounter++;
+            _timer.Dispose();
         }
     }
 }
