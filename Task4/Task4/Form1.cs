@@ -6,28 +6,28 @@ namespace Task4
     public partial class Form1 : Form
     {
         List<Point> list = new List<Point>();
-        List<Point> Position = new List<Point>();
         bool button = false;
         Pen color;
+        Pen reproductionColor;
         public Form1()
         {
             InitializeComponent();
+            SpeedTextBox.Text = "100";
+
         }
 
         private void Panel_MouseMove(object sender, MouseEventArgs e)
         {
             Stopwatch stopWatch = new Stopwatch();
-            list.Add(new Point(e.X, e.Y));
+
             if (Panel.Capture)
             {
-                stopWatch.Start();
-                Position.Add(new Point(e.X, e.Y));
-                Graphics g = Panel.CreateGraphics();
-                g.DrawLine(color, list[list.Count - 2], list[list.Count - 1]);
-            }
-            else
-            {
-                stopWatch.Stop();
+                list.Add(new Point(e.X, e.Y));
+                if (list.Count >= 2)
+                {
+                    Graphics g = Panel.CreateGraphics();
+                    g.DrawLine(color, list[list.Count - 2], list[list.Count - 1]);
+                }
             }
         }
 
@@ -47,8 +47,10 @@ namespace Task4
                 Random r = new Random();
                 Pen pen = new Pen(Color.FromArgb(r.Next(255), r.Next(255), r.Next(255), r.Next(255)), 10);
                 color = pen;
+                reproductionColor = color;
             }
         }
+
         private Timer _timer;
         private void ReproduceButton_Click(object sender, EventArgs e)
         {
@@ -66,19 +68,37 @@ namespace Task4
             {
                 Panel.Invalidate();
                 int num = 0;
-                // устанавливаем метод обратного вызова
+
+                double speed = Convert.ToDouble(SpeedTextBox.Text);
+
+                double difference = speed / 100.0;
+                int reproduction = (int)(20 / difference);
+
                 TimerCallback tm = new TimerCallback(Draw);
-                _timer = new Timer(tm, num, 0, 2000);
+                _timer = new Timer(tm, num, 0, reproduction);
             }
         }
-       
+
         private int _drawingLineCounter = 0;
         public void Draw(object obj)
         {
             Graphics g = Panel.CreateGraphics();
-            g.DrawLine(new Pen(Color.Black), list[_drawingLineCounter], list[_drawingLineCounter + 1]);
+            g.DrawLine(reproductionColor, list[_drawingLineCounter], list[_drawingLineCounter + 1]);
+            if (list.Count - 2 == _drawingLineCounter)
+            {
+                _timer.Dispose();
+                _drawingLineCounter = 0;
+            }
             _drawingLineCounter++;
-            _timer.Dispose();
+        }
+
+        private void ColorButton_Click(object sender, EventArgs e)
+        {
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+            {
+                reproductionColor = new Pen(colorDialog.Color, 10);
+                ColorButton.BackColor = colorDialog.Color;
+            }
         }
     }
 }
